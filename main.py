@@ -1,84 +1,138 @@
 from Disciplina import Disciplina
 import Dados
 
-erro = 'Nem ideia do que isso significa!'
-creditos_disciplinas = []
-dados_por_linha = Dados.importar_arquivo('exemplo1')
-disciplinas_cadastradas = []
-
-log_matematica = 4
-eng_software = 6
-teor_computacao = 3
-banco_dados = 6
-arq_software = 4
-
-creditos_disciplinas.append(log_matematica)
-creditos_disciplinas.append(eng_software)
-creditos_disciplinas.append(teor_computacao)
-creditos_disciplinas.append(banco_dados)
-creditos_disciplinas.append(arq_software)
-
-def total_creditos():
-    total = sum(disciplinas)
+def total_creditos(disciplinas):
+    total = 0
+    for key, value in disciplinas.items():
+        nome, cred = value
+        total += cred
     return total
 
-def aprovacao(media):
-    if media >= 5:
+def creditos_inconcluidos(dicionario, lista):
+    total = 0
+    for i,e in enumerate(lista):
+        if e.get_media() < 5:
+            for key, value in dicionario.items():
+                nome, cred = value
+                if e.get_nome() == nome:
+                    total += cred
+    return total
+
+def qual_disciplina(frase):
+    for key, value in disciplinas_cursadas.items():
+        nome, cred = value
+        if nome in frase:
+            return nome
+    return None    
+
+def reprovado(media):
+    if media < 5:
         return True
     return False
 
-def check_disciplina(nome):
+def esta_cadastrada(nome):
     for i,e in enumerate(disciplinas_cadastradas):
         if nome == e.get_nome():
             return e
-    return None
+    return False
+
+def adicionar_disciplina(dados, nome, p1, p2, media):
+    if dados[1] == 'media':
+        media = dados[2]
+    elif dados[1] == 'prova1':
+        p1 = dados[2]
+    elif dados[1] == 'prova2':
+        p2 = dados[2]
+    nova = Disciplina(nome, p1, p2, media)
+    disciplinas_cadastradas.append(nova)
+
+def atualizar_disciplina(dados):
+    if dados[1] == 'media':
+        disciplina.set_media(dados[2])
+    elif dados[1] == 'prova1':
+        disciplina.set_prova1(dados[2])
+    elif dados[1] == 'prova2':
+        disciplina.set_prova2(dados[2])
+    disciplina.atualizar_obj()
 
 
-for i,e in enumerate(dados_por_linha):
-    nome = None
-    p1 = None
-    p2 = None
-    media = None
-    palavras = Dados.split_linha(dados_por_linha[i])
-    tipo = Dados.definir_tipo(palavras)
-    if tipo == 'disciplina':
-        dados = Dados.se_disciplina(palavras)
-        nome = dados[0]
-        disciplina = check_disciplina(nome)
-        if disciplina == None:
-            if dados[1] == 'Media':
-                media = dados[2]
-            elif dados[1] == 'Prova1':
-                p1 = dados[2]
-            elif dados[1] == 'Prova2':
-                p2 = dados[2]
-            nova = Disciplina(nome, p1, p2, media)
-            disciplinas_cadastradas.append(nova)
-        else:
-            if dados[1] == 'Media':
-                disciplina.set_media(dados[2])
-            elif dados[1] == 'Prova1':
-                disciplina.set_prova1(dados[2])
-            elif dados[1] == 'Prova2':
-                disciplina.set_prova2(dados[2])  
-    elif tipo == 'questao':
-        pass
-    
-    
-    
-    
-    # print(disciplinas_cadastradas)
-    for i,disc in enumerate(disciplinas_cadastradas):
-        print(i, disc.nome, disc.prova1, disc.prova2, disc.media)
-        pass
-    
+disciplinas_cursadas = {}
+disciplinas_cursadas['logica'] = ['logica matematica', 4]
+disciplinas_cursadas['engenharia'] = ['engenharia de software', 6]
+disciplinas_cursadas['teoria'] = ['teoria da computacao', 3]
+disciplinas_cursadas['banco'] = ['banco de dados', 6]
+disciplinas_cursadas['arquitetura'] = ['arquitetura de software', 4]
+erro = 'Nem ideia do que isso significa!'
+disciplinas_cadastradas = []
+lista_respostas = []
+nome_arquivo = input('Digite o nome do arquivo: ')
+lista_dados = Dados.importar_arquivo(nome_arquivo)
 
-    
-
-
-#print(str(converter_para_eua(input('digite a nota: '))))
-test = Disciplina('Logica matematica', 3, None, 5)
-print(test.get_nome()+' - media: '+str(test.get_media())+' - prova1: '+str(test.get_prova1())+' - prova2: '+str(test.get_prova2()))
-#print(test.get_prova2())
-
-    
+if lista_dados == 'erro':
+    print('Erro, arquivo não encontrado')
+else:
+    for i,elem in enumerate(lista_dados):
+        nome = None
+        p1 = None
+        p2 = None
+        media = None
+        palavras = Dados.split_linha(elem)
+        tipo = Dados.definir_tipo(palavras)
+        if tipo == 'disciplina':
+            dados = Dados.se_disciplina(palavras)
+            nome = dados[0]
+            disciplina = esta_cadastrada(nome)
+            if disciplina == False:
+                adicionar_disciplina(dados, nome, p1, p2, media)
+            else:
+                atualizar_disciplina(dados)
+    for i,elem in enumerate(lista_dados):
+        nome = None
+        p1 = None
+        p2 = None
+        media = None
+        palavras = Dados.split_linha(elem)
+        tipo = Dados.definir_tipo(palavras)
+        if tipo == 'questao':
+            resposta = ''
+            frase = Dados.lista_to_string(palavras)
+            nome = qual_disciplina(frase)
+            obj_disciplina = esta_cadastrada(nome) 
+            if 'quantos creditos' in frase:
+                total = total_creditos(disciplinas_cursadas)
+                if 'cursou' in frase:
+                    resposta = ('No semestre cursei {} creditos'.format(total))  
+                elif 'concluiu' in frase:
+                    concluidos = total - creditos_inconcluidos(disciplinas_cursadas, disciplinas_cadastradas)
+                    resposta = ('Conclui {} creditos'.format(concluidos))
+                else:
+                    resposta = erro
+            elif 'voce foi aprovado' in frase:
+                if 'todas' in frase:
+                    reprovadas = ''
+                    for i,e in enumerate(disciplinas_cadastradas):
+                        if reprovado(e.get_media()):
+                            reprovadas = reprovadas.join(e.get_nome().title()+'')
+                    if reprovadas:
+                        resposta = ('Não, fui reprovado em '+reprovadas)      
+                else:
+                    resposta = erro
+            elif nome and obj_disciplina:
+                if 'qual a media' in frase:
+                    media = obj_disciplina.get_media()
+                    resposta = ('A media em {} é {}'.format(nome.title(), round(media, 1)))
+                elif 'qual a nota' in frase:
+                    if 'preciso' or 'deve ser' not in frase:
+                        if 'prova1' in frase:
+                            prova1 = obj_disciplina.get_prova1()
+                            resposta = ('A nota da prova1 em {} é {}'.format(nome.title(), round(prova1, 1)))
+                        elif 'prova2' in frase:
+                            prova2 = obj_disciplina.get_prova2()
+                            resposta = ('A nota da prova2 em {} é {}'.format(nome.title(), round(prova2, 1)))
+                        else:
+                            resposta = erro 
+            else:
+                resposta = erro
+            lista_respostas.append(resposta)
+               
+Dados.exportar_resultados(nome_arquivo, lista_respostas)

@@ -40,12 +40,25 @@ def converter_para_eua(nota):
         return 'Erro'
 
 def importar_arquivo(nome_arquivo):
-    array_dados = []
-    arquivo = open('./{}.txt'.format(nome_arquivo), 'r')
-    for linha in arquivo:
-        array_dados.append(linha)
-    arquivo.close()
-    return array_dados
+    try:
+        array_dados = []
+        arquivo = open('./{}.txt'.format(nome_arquivo), 'r')
+        for linha in arquivo:
+            array_dados.append(linha.lower())
+        arquivo.close()
+        return array_dados
+    except:
+        return 'erro'
+
+def exportar_resultados(nome_arquivo, lista):
+    try:
+        arquivo = open(str('./out_{}.txt'.format(nome_arquivo)), 'w')
+        for r in lista:
+            arquivo.write('{}\n'.format(r))
+        arquivo.close()
+        return 'Arquivo criado com sucesso!'
+    except:
+        return 'Erro, arquivo já existe'
 
 def split_linha(linha):
     palavras = linha.rstrip().split(' ')
@@ -53,7 +66,7 @@ def split_linha(linha):
 
 def definir_tipo(palavras):
     info = palavras
-    if info[-2] in ('Media', 'Prova1', 'Prova2'):
+    if info[-2] in ('media', 'prova1', 'prova2'):
         return 'disciplina'
     else:
         return 'questao'
@@ -71,6 +84,9 @@ def se_pergunta(linha):
     if linha.lower().startswith('qual'):
         questoes.append(linha)
 
-
-
+def lista_to_string(lista):
+    frase = ''
+    for x in lista:
+        frase = frase+x+' '
+    return frase
 

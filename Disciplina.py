@@ -6,7 +6,6 @@ def calcular_prova2(p1, media):
     p2 = (2 * media) - p1
     return p2
 
-
 class Disciplina:
     def __init__(self, nome, prova1=None, prova2=None, media=None):
         self.nome = nome
@@ -38,37 +37,13 @@ class Disciplina:
     def set_media(self, media):
         self.media = media
 
-    def atualizar_prova1(self, p1):
-        prova1 = p1
-        if prova1 != None:
-            self.prova1 = prova1
-        elif self.prova2 != None and self.media != None:
-            self.prova1 = calcular_prova1(self.prova2, self.media)
-        else:
-            self.prova1 = None    
-
-    def atualizar_prova2(self, p2):
-        prova2 = p2
-        if prova2 != None:
-            self.prova2 = prova2
-        elif self.prova1 != None and self.media != None:
-            self.prova2 = calcular_prova2(self.prova1, self.media)
-        else:
-            self.prova2 = None
-    
-    def atualizar_media(self, m):
-        media = m
-        if media:
-            self.media = media
-        elif self.prova1 and self.prova2:
+  
+    def atualizar_obj(self):
+        if self.prova1 and self.prova2:
             self.media = calcular_media(self.prova1, self.prova2)
-        else:
-            self.media = None
-    
-
-    
-
-
-    
-
-    
+        elif self.prova1 and self.media:
+            p2 = calcular_prova2(self.prova1, self.media)
+            if p2 > 10:
+                self.prova2 = 10.0
+            else: 
+                self.prova2 = p2
